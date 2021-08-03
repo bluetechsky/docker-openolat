@@ -1,12 +1,23 @@
 # docker-openolat
 Creates a Container for OpenOlat
 
+## 1. Build docker image:
+- docker build -t mysite .
+## 2. Run app
+- docker run -dp 8080:8080 mysite
+=> OK
+
 ## Prerequisite
 If you want to run your OpenOlat with a remote database (MySQL/MariaDB, Oracle, PostgreSQL) then you have to create the database with tables and keys first. The 
 necessary SQL-file can you find here:
-- $INSTALL_DIR/webapp/WEB-INF/classes/database/$DB_TYPE/setupDatasbe.sql
+- $INSTALL_DIR/webapp/WEB-INF/classes/database/$DB_TYPE/setupDatabase.sql
 
 You can also find the file in the OpenOlat WAR-file when you unzip it.
+### Step 1: Setup Postgresql in local computer (not a docker)
+### Step 2: Create a db name "openolatdocker"
+### Step 3: Import above file ("setupDatabase.sql") to that db.
+### Step 4: Change DB username and pass in 2 files: olat.properties and olat.local.properties in this folder
+### Step 5: Run build as number 1. & 2. above   => Done
 
 ## Environmental Variables
 | **Variable** | **Meaning** | **Possible Values** | **Default Value** |

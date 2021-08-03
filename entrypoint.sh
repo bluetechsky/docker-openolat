@@ -98,10 +98,12 @@ if [[ -e "$INSTALL_DIR/install_information" ]] && [[ "$(get_configuration_inform
 		download_openolat "$OPENOLAT_URL" "$OPENOLAT_VERSION"
 
 		# move OpenOlat configuration file; delete old data; unzip downloaded file to INSTALL_DIR; mv OpenOlat configuration file back
-		mv "$INSTALL_DIR/webapp/WEB-INF/classes/serviceconfig/olat.properties" "$INSTALL_DIR/olat.properties"
-		rm -r "$INSTALL_DIR/webapp"
-		unzip -qq "/tmp/openolat.war" -d "$INSTALL_DIR"/webapp
-		mv "$INSTALL_DIR/olat.properties" "$INSTALL_DIR/webapp/WEB-INF/classes/serviceconfig/olat.properties"
+		mv "$INSTALL_DIR/tomcat/webapps/webapp/WEB-INF/classes/serviceconfig/olat.properties" "$INSTALL_DIR/olat.properties"
+		mv "$INSTALL_DIR/tomcat/webapps/webapp/WEB-INF/classes/olat.local.properties" "$INSTALL_DIR/olat.local.properties"
+		rm -r "$INSTALL_DIR/tomcat/webapps/webapp"
+		unzip -qq "/tmp/openolat.war" -d "$INSTALL_DIR"/tomcat/webapps/webapp
+		mv "$INSTALL_DIR/olat.properties" "$INSTALL_DIR/tomcat/webapps/webapp/WEB-INF/classes/serviceconfig/olat.properties"
+		mv "$INSTALL_DIR/olat.local.properties" "$INSTALL_DIR/tomcat/webapps/webapp/WEB-INF/classes/olat.local.properties"
 	fi
 
 	# check if Tomcat has to be update
@@ -120,12 +122,15 @@ if [[ -e "$INSTALL_DIR/install_information" ]] && [[ "$(get_configuration_inform
 	if [[ "$DOMAINNAME" -ne $(get_configuration_information "$INSTALL_DIR/install_information" "USED_DOMAINNAME") ]]; then
 		echo "Change Domainname from $USED_DOMAINNAME to $DOMAINNAME"
 		
-		mkdir -p "$INSTALL_DIR/conf/Catalina/$DOMAINNAME"
-		mv "$INSTALL_DIR/conf/Catalina/$USED_DOMAINNAME/ROOT.xml" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
-		mkdir -p "$INSTALL_DIR/conf/Catalina/$USED_DOMAINNAME"
+		# mkdir -p "$INSTALL_DIR/conf/Catalina/$DOMAINNAME"
+		# mv "$INSTALL_DIR/conf/Catalina/$USED_DOMAINNAME/ROOT.xml" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
+		# mkdir -p "$INSTALL_DIR/conf/Catalina/$USED_DOMAINNAME"
 		
-		sed -i -s "s+$USED_DOMAINNAME+$DOMAINNAME+g" "$INSTALL_DIR/conf/server.xml"
-		sed -i -s "s+$USED_DOMAINNAME+$DOMAINNAME+g" "$INSTALL_DIR/lib/olat.local.properties"
+		# sed -i -s "s+$USED_DOMAINNAME+$DOMAINNAME+g" "$INSTALL_DIR/conf/server.xml"
+		# #Hung added
+		# sed -i -s "s+$USED_DOMAINNAME+$DOMAINNAME+g" "$INSTALL_DIR/conf/context.xml"
+		# #End Hung
+		# sed -i -s "s+$USED_DOMAINNAME+$DOMAINNAME+g" "$INSTALL_DIR/lib/olat.local.properties"
 	fi
 
 	echo "Everything is already installed. Startup now!"
@@ -133,11 +138,13 @@ if [[ -e "$INSTALL_DIR/install_information" ]] && [[ "$(get_configuration_inform
 	# set environment variables
 	export JAVA_HOME=$JAVA_DIR
 	export JRE_HOME=$JAVA_DIR
-	export CATALINA_BASE=$INSTALL_DIR
+	# export CATALINA_BASE=$INSTALL_DIR
 	export CATALINA_HOME=$INSTALL_DIR/tomcat
+	export LANG=en_US.UTF-8
 
 	# Start OpenOlat
-	/bin/sh /start run >> "$INSTALL_DIR/logs/stdout.log"
+	# /bin/sh /start run >> "$INSTALL_DIR/logs/stdout.log"
+	/bin/sh $INSTALL_DIR/tomcat/bin/catalina.sh run >> "$INSTALL_DIR/logs/stdout.log"
 	
 	exit 0
 fi
@@ -145,8 +152,8 @@ fi
 # create necessary folders
 echo "Create necessary folders for OpenOlat in: $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
-mkdir "$INSTALL_DIR/bin" "$INSTALL_DIR/conf" "$INSTALL_DIR/lib" "$INSTALL_DIR/logs" "$INSTALL_DIR/olatdata" "$INSTALL_DIR/run"
-mkdir -p "$INSTALL_DIR/conf/Catalina/$DOMAINNAME"
+mkdir "$INSTALL_DIR/olatdata" "$INSTALL_DIR/logs"
+# mkdir -p "$INSTALL_DIR/conf/Catalina/$DOMAINNAME"
 
 # download OpenOlat
 echo "Download OpenOlat Version: $OPENOLAT_VERSION"
@@ -169,20 +176,30 @@ echo "Unpack downloaded files to installation directory (this can be take some t
 tar xf "/tmp/tomcat.tar.gz" -C "$INSTALL_DIR"
 mv "$INSTALL_DIR"/apache-tomcat-* "$INSTALL_DIR"/tomcat
 
-unzip -qq "/tmp/openolat.war" -d "$INSTALL_DIR"/webapp
+unzip -qq "/tmp/openolat.war" -d "$INSTALL_DIR"/tomcat/webapps/webapp
 
 # Symlink tomcat files to created folders
-echo "Create necessary Symlinks/Move files"
-ln -s "$INSTALL_DIR/tomcat/bin/catalina.sh" "/start"
-ln -s "$INSTALL_DIR/tomcat/bin/startup.sh" "$INSTALL_DIR/start"
-ln -s "$INSTALL_DIR/tomcat/bin/shutdown.sh" "$INSTALL_DIR/stop"
-ln -s "$INSTALL_DIR/tomcat/bin/catalina.sh" "$INSTALL_DIR/bin/catalina.sh"
-ln -s "$INSTALL_DIR/tomcat/bin/catalina.sh" "$INSTALL_DIR/conf/catalina.sh"
-ln -s "$INSTALL_DIR/tomcat/conf/web.xml" "$INSTALL_DIR/conf/web.xml"
+# echo "Create necessary Symlinks/Move files"
+# ln -s "$INSTALL_DIR/tomcat/bin/catalina.sh" "/start"
+# ln -s "$INSTALL_DIR/tomcat/bin/startup.sh" "$INSTALL_DIR/start"
+# ln -s "$INSTALL_DIR/tomcat/bin/shutdown.sh" "$INSTALL_DIR/stop"
+# ln -s "$INSTALL_DIR/tomcat/bin/catalina.sh" "$INSTALL_DIR/bin/catalina.sh"
+# ln -s "$INSTALL_DIR/tomcat/bin/catalina.sh" "$INSTALL_DIR/conf/catalina.sh"
+# ln -s "$INSTALL_DIR/tomcat/conf/web.xml" "$INSTALL_DIR/conf/web.xml"
 
-mv "/tmp/server.xml" "$INSTALL_DIR/conf/server.xml"
-mv "/tmp/log4j2.xml" "$INSTALL_DIR/lib/log4j2.xml"
-mv "/tmp/olat.local.properties" "$INSTALL_DIR/lib/olat.local.properties"
+# mv "/tmp/server.xml" "$INSTALL_DIR/conf/server.xml"
+#Hung added
+echo "Copy context.xml to $INSTALL_DIR/tomcat/conf/context.xml"
+cp "/tmp/context.xml" "$INSTALL_DIR/tomcat/conf/context.xml"
+echo "Copy tomcat-users.xml.xml to $INSTALL_DIR/tomcat/conf/tomcat-users.xml"
+cp "/tmp/tomcat-users.xml" "$INSTALL_DIR/tomcat/conf/tomcat-users.xml"
+# Khong copy nua ma chi copy olat.local.properties thoi
+echo "Copy olat.properties to $INSTALL_DIR/tomcat/webapps/webapp/WEB-INF/classes/serviceconfig/olat.properties"
+cp "/tmp/olat.properties" "$INSTALL_DIR/tomcat/webapps/webapp/WEB-INF/classes/serviceconfig/olat.properties"
+#End
+# mv "/tmp/log4j2.xml" "$INSTALL_DIR/lib/log4j2.xml"
+echo "Copy olat.local.properties to $INSTALL_DIR/tomcat/webapps/webapp/WEB-INF/classes/olat.local.properties"
+cp "/tmp/olat.local.properties" "$INSTALL_DIR/tomcat/webapps/webapp/WEB-INF/classes/olat.local.properties"
 
 # Database configuration
 echo "Create database configuration for OpenOlat"
@@ -200,72 +217,86 @@ case $DB_TYPE in
 	"postgresql")
 		DB_PORT=$([[ ! -z $DB_PORT ]] && echo $DB_PORT || echo "5432")
 		
-		mv "/tmp/postgresql.xml" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
+		# mv "/tmp/postgresql.xml" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
+		# Hung added
+		echo "Copy spring-jdbc-5.3.8.jar +  postgresql-42.2.22.jar to $INSTALL_DIR/tomcat/lib"
+		cp "/tmp/spring-jdbc-5.3.8.jar" "$INSTALL_DIR/tomcat/lib/spring-jdbc-5.3.8.jar" 
+		cp "/tmp/postgresql-42.2.22.jar" "$INSTALL_DIR/tomcat/lib/postgresql-42.2.22.jar" 
+		# End
 		;;
 	*)
 		mv "/tmp/sqlite.xml" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
 		;;
 esac
 
-sed -i -s "s+_INSTALL_DIR_+$INSTALL_DIR+g" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
-sed -i -s "s+_DB_HOST_+$DB_HOST+g" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
-sed -i -s "s+_DB_PORT_+$DB_PORT+g" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
-sed -i -s "s+_DB_NAME_+$DB_NAME+g" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
-sed -i -s "s+_DB_USER_+$DB_USER+g" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
-sed -i -s "s+_DB_PASS_+$DB_PASS+g" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
+# sed -i -s "s+_INSTALL_DIR_+$INSTALL_DIR+g" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
+# sed -i -s "s+_DB_HOST_+$DB_HOST+g" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
+# sed -i -s "s+_DB_PORT_+$DB_PORT+g" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
+# sed -i -s "s+_DB_NAME_+$DB_NAME+g" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
+# sed -i -s "s+_DB_USER_+$DB_USER+g" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
+# sed -i -s "s+_DB_PASS_+$DB_PASS+g" "$INSTALL_DIR/conf/Catalina/$DOMAINNAME/ROOT.xml"
 
 echo "Update OpenOlat configuration file"
-sed -i -s "s+_INSTALL_DIR_+$INSTALL_DIR+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_DOMAINNAME_+$DOMAINNAME+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_DB_TYPE_+$DB_TYPE+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_DB_NAME_+$DB_NAME+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_DB_USER_+$DB_USER+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_DB_PASS_+$DB_PASS+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_SMTP_HOST_+$SMTP_HOST+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_SMTP_PORT_+$SMTP_PORT+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_SMTP_USER_+$SMTP_USER+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_SMTP_PASS_+$SMTP_PASS+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_SMTP_FROM_+$SMTP_FROM+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_SMTP_ADMIN_+$SMTP_ADMIN+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_SMTP_SSL_+$SMTP_SSL+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_SMTP_STARTTLS_+$SMTP_STARTTLS+g" "$INSTALL_DIR/lib/olat.local.properties"
-sed -i -s "s+_SMTP_CHECK_CERT_+$SMTP_CHECK_CERT+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_INSTALL_DIR_+$INSTALL_DIR+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_DOMAINNAME_+$DOMAINNAME+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_DB_TYPE_+$DB_TYPE+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_DB_NAME_+$DB_NAME+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_DB_USER_+$DB_USER+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_DB_PASS_+$DB_PASS+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_SMTP_HOST_+$SMTP_HOST+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_SMTP_PORT_+$SMTP_PORT+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_SMTP_USER_+$SMTP_USER+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_SMTP_PASS_+$SMTP_PASS+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_SMTP_FROM_+$SMTP_FROM+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_SMTP_ADMIN_+$SMTP_ADMIN+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_SMTP_SSL_+$SMTP_SSL+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_SMTP_STARTTLS_+$SMTP_STARTTLS+g" "$INSTALL_DIR/lib/olat.local.properties"
+# sed -i -s "s+_SMTP_CHECK_CERT_+$SMTP_CHECK_CERT+g" "$INSTALL_DIR/lib/olat.local.properties"
 
-sed -i -s "s+_INSTALL_DIR_+$INSTALL_DIR+g" "$INSTALL_DIR/lib/log4j2.xml"
+# sed -i -s "s+_INSTALL_DIR_+$INSTALL_DIR+g" "$INSTALL_DIR/lib/log4j2.xml"
 
-sed -i -s "s+_DOMAINNAME_+$DOMAINNAME+g" "$INSTALL_DIR/conf/server.xml"
+# sed -i -s "s+_DOMAINNAME_+$DOMAINNAME+g" "$INSTALL_DIR/conf/server.xml"
+# #Hung added
+# sed -i -s "s+_DOMAINNAME_+$DOMAINNAME+g" "$INSTALL_DIR/conf/context.xml"
+# #End Hung
 
 # create setenv.sh file with Catalina/Java information
 echo "Create environment file for tomcat"
-touch "$INSTALL_DIR/bin/setenv.sh"
+touch "$INSTALL_DIR/tomcat/bin/setenv.sh"
 
-echo "CATALINA_HOME=$INSTALL_DIR/tomcat" >> "$INSTALL_DIR/bin/setenv.sh"
-echo "CATALINA_BASE=$INSTALL_DIR" >> "$INSTALL_DIR/bin/setenv.sh"
-echo "CATALINA_PID=$INSTALL_DIR/run/openolat.pid" >> "$INSTALL_DIR/bin/setenv.sh"
-echo "CATALINA_TMPDIR=/tmp/openolat" >> "$INSTALL_DIR/bin/setenv.sh"
-echo "JRE_HOME=$JAVA_DIR" >> "$INSTALL_DIR/bin/setenv.sh"
+echo "CATALINA_HOME=$INSTALL_DIR/tomcat" >> "$INSTALL_DIR/tomcat/bin/setenv.sh"
+# echo "CATALINA_BASE=$INSTALL_DIR" >> "$INSTALL_DIR/setenv.sh"
+# echo "CATALINA_PID=$INSTALL_DIR/run/openolat.pid" >> "$INSTALL_DIR/bin/setenv.sh"
+echo "CATALINA_TMPDIR=/tmp/openolat" >> "$INSTALL_DIR/tomcat/bin/setenv.sh"
+echo "JRE_HOME=$JAVA_DIR" >> "$INSTALL_DIR/tomcat/bin/setenv.sh"
 
 # Catalina options variable for performance issues
-CATALINA_OPTS="-Xmx1024m -Xms512m -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=."
-echo "CATALINA_OPTS=\"$CATALINA_OPTS\"" >> "$INSTALL_DIR/bin/setenv.sh"
+# CATALINA_OPTS="-Xmx4048m -Xms1024m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=."
+CATALINA_OPTS="-Xmx4048m -Xms1024m -server -XX:+UseParallelGC"
+echo "Setting CATALINA_OPTS=\"$CATALINA_OPTS\" to tomcat/bin/setenv.sh" 
 
-echo "" >> "$INSTALL_DIR/bin/setenv.sh"
-echo 'mkdir -p $CATALINA_TMPDIR' >> "$INSTALL_DIR/bin/setenv.sh"
+echo "CATALINA_OPTS=\"$CATALINA_OPTS\"" >> "$INSTALL_DIR/tomcat/bin/setenv.sh"
+
+echo "" >> "$INSTALL_DIR/tomcat/bin/setenv.sh"
+echo 'mkdir -p $CATALINA_TMPDIR' >> "$INSTALL_DIR/tomcat/bin/setenv.sh"
 
 # set global variables
 echo "Set global environment variables"
 export JAVA_HOME=$JAVA_DIR
 export JRE_HOME=$JAVA_DIR
-export CATALINA_BASE=$INSTALL_DIR
+export LANG=en_US.UTF-8
+
+# export CATALINA_BASE=$INSTALL_DIR
 export CATALINA_HOME=$INSTALL_DIR/tomcat
 #export CATALINA_OPTS="$CATALINA_OPTS"
+echo "JAVA_HOME=\"$JAVA_HOME\"" 
 
 # delete not necessary files
 echo "Clean up"
-rm -r /tmp/*.xml
-rm -r /tmp/openolat.war
-rm -r /tmp/tomcat.tar.gz
-rm -r /tmp/*.service
+# rm -r /tmp/*.xml
+# rm -r /tmp/openolat.war
+# rm -r /tmp/tomcat.tar.gz
+# rm -r /tmp/*.service
 
 # create install_information file and save configuration information in
 echo "Write installation information"
@@ -278,5 +309,7 @@ echo "USED_DOMAINNAME=$DOMAINNAME" >> "$INSTALL_DIR/install_information"
 
 # Start openolat
 echo "Start OpenOlat"
-/bin/sh /start run >> "$INSTALL_DIR/logs/stdout.log"
+# /bin/sh /start run >> "$INSTALL_DIR/logs/stdout.log"
+/bin/sh $INSTALL_DIR/tomcat/bin/catalina.sh run >> "$INSTALL_DIR/logs/stdout.log"
+
 exit 0
