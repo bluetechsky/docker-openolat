@@ -191,9 +191,7 @@ unzip -qq "/tmp/openolat.war" -d "$INSTALL_DIR"/tomcat/webapps/webapp
 #Hung added
 echo "Copy context.xml to $INSTALL_DIR/tomcat/conf/context.xml"
 cp "/tmp/context.xml" "$INSTALL_DIR/tomcat/conf/context.xml"
-echo "Copy tomcat-users.xml.xml to $INSTALL_DIR/tomcat/conf/tomcat-users.xml"
-cp "/tmp/tomcat-users.xml" "$INSTALL_DIR/tomcat/conf/tomcat-users.xml"
-# Khong copy nua ma chi copy olat.local.properties thoi
+# Copy this because it does not recognize db port setting in olat.local.properties
 echo "Copy olat.properties to $INSTALL_DIR/tomcat/webapps/webapp/WEB-INF/classes/serviceconfig/olat.properties"
 cp "/tmp/olat.properties" "$INSTALL_DIR/tomcat/webapps/webapp/WEB-INF/classes/serviceconfig/olat.properties"
 #End

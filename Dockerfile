@@ -23,7 +23,6 @@ COPY database/postgresql-42.2.22.jar /tmp/postgresql-42.2.22.jar
 # End Hung
 # COPY database/oracle.xml /tmp/oracle.xml
 # COPY database/sqlite.xml /tmp/sqlite.xml
-COPY tomcat-users.xml /tmp/tomcat-users.xml
 COPY context.xml /tmp/context.xml
 COPY olat.properties /tmp/olat.properties
 COPY olat.local.properties /tmp/olat.local.properties
@@ -41,7 +40,6 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8     
 
 RUN apt install -y default-jre default-jre-headless unzip curl wget
-# RUN apt install -y openjdk-8-jre openjdk-8-jre-headless unzip curl wget
 RUN java -version
 RUN chmod 0777 /entrypoint.sh
 

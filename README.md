@@ -20,7 +20,10 @@ You can also find the file in the OpenOlat WAR-file when you unzip it.
 ### Step 5: Run build as number 1. & 2. above   => Done
 
 ## Environmental Variables
-| **Variable** | **Meaning** | **Possible Values** | **Default Value** |
+
+### Only need to change INSTALL_DIR to location inside docker OS environment where tomcat and openolat to be extracted only.
+
+~~| **Variable** | **Meaning** | **Possible Values** | **Default Value** |
 |---|---|---|---|
 | DOMAINNAME | Defines the name of used domain | IP or Hostname | localhost |
 | OPENOLAT_VERSION | Version of OpenOlat which will be downloaded | * | latest |
@@ -44,20 +47,20 @@ You can also find the file in the OpenOlat WAR-file when you unzip it.
 | SMTP_STARTTLS | Use Starttls encryption | true, false | false |
 | SMTP_CHECK_CERT | Check Server Certificate | true, false | false |
 
-* means everything
+* means everything~~
 
 ## Ports
-This image only needs Port 8088 TCP for HTTP.
+This image only needs Port *8080* TCP for HTTP.
 
 ## Necessary files
 The following files are relevant to control OpenOlat.
-- $INSTALL_DIR/lib/olat.local.properties
-- $INSTALL_DIR/webapp/WEB-INF/classes/serviceconfig/olat.properties
+- $INSTALL_DIR/tomcat/webapps/webapp/WEB-INF/classes/olat.local.properties
+- $INSTALL_DIR/tomcat/webapps/webapp/WEB-INF/classes/serviceconfig/olat.properties
 
-The file "olat.local.properties" overwrite properties from olat.properties.
+The some params in file "olat.local.properties" overwrite properties from olat.properties.
 
 ## Volumes
-The datadictionary of OpenOlat you can find in $INSTALL_DIR/olatdata
+The user data directory of OpenOlat you can find in $INSTALL_DIR/olatdata
 
 ## How to update/downgrade OpenOlat or Tomcat
 1) Enter new Version of OpenOlat or Tomcat into environment variable
@@ -66,6 +69,8 @@ The datadictionary of OpenOlat you can find in $INSTALL_DIR/olatdata
 
 ## Note
 * The CPU usage will be very high on start
+* context.xml: <Resources cacheMaxSize="51200" /> need to avoid warning cache
+
 
 ## Sources
 [OpenOlat Adminwiki](https://www.openolat.com/fileadmin/adminwiki/_START_.html) \
